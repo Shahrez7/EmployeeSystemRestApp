@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Employee Management System</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 20px;
+      background-color: #f2f2f2;
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      color: #666;
+      border-bottom: 2px solid #666;
+      padding-bottom: 5px;
+    }
+
+    form {
+      margin-bottom: 30px;
+      max-width: 400px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+      color: #444;
+    }
+
+    button[type="submit"] {
+      padding: 10px 20px;
+      background-color: #337ab7;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #23527c;
+    }
+
+    #listemp {
+      margin-top: 20px;
+    }
+
+    #listemp div {
+      margin-bottom: 5px;
+      background-color: #fff;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    #listemp div:last-child {
+      margin-bottom: 0;
+    }
+
+   
+    form + h2 {
+      margin-top: 40px;
+    }
+
+
+    form button,
+    form label {
+      display: block;
+    }
+
+
+    #listemp a {
+      color: #337ab7;
+      text-decoration: none;
+    }
+
+    #listemp a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Employee Management System</h1>
+
+<h2>List of Employees</h2>
+<div id="listemp">
+
+</div>
+
+<form id="createEmp">
+  <h2>Create New Employee</h2>
+  <label for="id">ID:</label>
+  <input type="number" id="id" required>
+  <label for="name">Name:</label>
+  <textarea id="name" required></textarea>
+  <label for="designation">Designation:</label>
+  <input type="text" id="designation" required>
+  <label for="department">Department:</label>
+  <input type="text" id="department" required>
+  <label for="salary">Salary:</label>
+  <input type="number" id="salary" required>
+  <button type="submit">Create</button>
+</form>
+
+<h2>Delete Employee</h2>
+<form id="delete-emp-form">
+  <label for="delete-emp-id">Employee ID:</label>
+  <input type="text" id="delete-emp-id" required>
+  <button type="submit">Delete</button>
+</form>
+<h2>Update Employee</h2>
+<form id="change-employee-form">
+  <label for="change-employee-id">Employee ID:</label>
+  <input type="number" id="change-employee-id" required>
+  <br>
+
+  <label for="change-employee-name">Name:</label>
+  <input type="text" id="change-employee-name" required>
+  <br>
+
+  <label for="change-employee-designation">Designation:</label>
+  <input type="text" id="change-employee-designation" required>
+  <br>
+
+  <label for="change-employee-department">Department:</label>
+  <input type="text" id="change-employee-department" required>
+  <br>
+
+  <label for="change-employee-salary">Salary:</label>
+  <input type="number" id="change-employee-salary" required>
+  <br>
+
+  <button type="submit">Update Employee</button>
+</form>
+
+<script>
+
+  function GetEmployees() {
+    fetch('h/path')
+            .then(response => response.json())
+            .then(data => {
+              const empl = document.getElementById('listemp');
+              empl.innerHTML = ''; // Clear the existing list
+              data.forEach(movie => {
+                const empItem = document.createElement('div');
+                const empLink = document.createElement('a');
+                empLink.textContent = `${movie}`;
+                empLink.href = `http://localhost:8080/untitled_war/details`;
+                empItem.appendChild(empLink);
+                empl.appendChild(empItem);
+              });
+            })
+            .catch(error => console.error('Error Finding Employees:', error));
+  }
+
+
+  function newEmp(event) {
+    event.preventDefault();
+    const form = document.getElementById('createEmp');
+    const id = document.getElementById('id').value;
+    const name = document.getElementById('name').value;
+    const designation = document.getElementById('designation').value;
+    const department= document.getElementById('department').value;
+    const salary = document.getElementById('salary').value;
+
+
+    const emp = {
+      id: id,
+      name: name,
+      designation: designation,
+      department: department,
+      salary: salary
+    };
+
+    fetch('h/path', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(emp)
+    })
+            .then(response => response.json())
+            .then(data => {
+              console.log('New movie entry created:', data);
+              form.reset(); // Reset the form fields
+              GetEmployees();
+            })
+            .catch(error => console.error('Error creating Employee', error));
+  }
+  function updateEmployee(event) {
+    event.preventDefault();
+    const form = document.getElementById('change-employee-form');
+    const empId = document.getElementById('change-employee-id').value;
+    const name = document.getElementById('change-employee-name').value;
+    const designation = document.getElementById('change-employee-designation').value;
+    const department = document.getElementById('change-employee-department').value;
+    const salary = document.getElementById('change-employee-salary').value;
+
+    const employee = {
+      id: empId,
+      name: name,
+      designation: designation,
+      department: department,
+      salary: salary
+    };
+
+    fetch(`h/path/employees/${empId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(employee)
+    })
+            .then(response => {
+              if (response.ok) {
+                console.log('Employee entry changed successfully');
+                form.reset(); // Reset the form fields
+                GetEmployees(); // Refresh the employees list
+              } else {
+                console.error('Error changing employee entry:', response.statusText);
+              }
+            })
+            .catch(error => console.error('Error changing employee entry:', error));
+  }
+
+  function deleteEmployee(event) {
+    event.preventDefault();
+    const form = document.getElementById('delete-emp-form');
+    const empid = document.getElementById('delete-emp-id').value;
+
+    fetch(`h/path/${empid}`, {
+      method: 'DELETE'
+    })
+            .then(response => {
+              if (response.ok) {
+                console.log('Employee deleted successfully');
+                form.reset();
+                GetEmployees();
+              } else {
+                console.error('Error deleting ', response.statusText);
+              }
+            })
+            .catch(error => console.error('Error deleting:', error));
+  }
+  const createEmpForm = document.getElementById('createEmp');
+  const changeEmployeeForm = document.getElementById('change-employee-form');
+  const deleteEmpForm = document.getElementById('delete-emp-form');
+  createEmpForm.addEventListener('submit', newEmp);
+  changeEmployeeForm.addEventListener('submit', updateEmployee);
+  deleteEmpForm.addEventListener('submit', deleteEmployee);
+
+  GetEmployees();
+</script>
+</body>
+</html>
